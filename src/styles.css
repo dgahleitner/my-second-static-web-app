@@ -3,7 +3,8 @@
 }
 
 #map img {
-  width: 100%; /* oder eine andere Größe */
+  width: 100%;
+  height: auto;
 }
 
 .punkt {
@@ -13,20 +14,6 @@
   border-radius: 50%;
   background-color: red;
 }
-
-/* weitere Punkte hier positionieren */
-#punkt1 { top: 50px; left: 50px; }
-#punkt2 { top: 100px; left: 100px; }
-#punkt3 { top: 150px; left: 150px; }
-#punkt4 { top: 200px; left: 200px; }
-#punkt5 { top: 250px; left: 250px; }
-#punkt6 { top: 300px; left: 300px; }
-#punkt7 { top: 350px; left: 350px; }
-#punkt8 { top: 400px; left: 400px; }
-#punkt9 { top: 450px; left: 450px; }
-#punkt10 { top: 500px; left: 500px; }
-#punkt11 { top: 550px; left: 550px; }
-#punkt12 { top: 600px; left: 600px; }
 
 .farbe {
   display: inline-block;
@@ -51,4 +38,9 @@
   border: 1px solid black;
   padding: 5px;
   z-index: 100;
+}
+
+#buttons {
+  display: flex;
+  gap: 10px;
 }

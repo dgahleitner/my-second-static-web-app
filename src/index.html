@@ -6,20 +6,15 @@
 <body>
   <div id="map">
     <img src="bild.png" alt="Gebäudeplan">
-    <div class="punkt" id="punkt1"></div>
-    <div class="punkt" id="punkt2"></div>
-    <div class="punkt" id="punkt3"></div>
-    <div class="punkt" id="punkt4"></div>
-    <div class="punkt" id="punkt5"></div>
-    <div class="punkt" id="punkt6"></div>
-    <div class="punkt" id="punkt7"></div>
-    <div class="punkt" id="punkt8"></div>
-    <div class="punkt" id="punkt9"></div>
-    <div class="punkt" id="punkt10"></div>
-    <div class="punkt" id="punkt11"></div>
-    <div class="punkt" id="punkt12"></div>
   </div>
-  <button id="edit-btn">Bearbeiten</button>
+  <div id="buttons">
+    <button id="edit-btn">Bearbeiten</button>
+    <button id="add-btn" style="display: none;">Punkt hinzufügen</button>
+    <button id="delete-btn" style="display: none;">Punkt löschen</button>
+    <div id="slider-div" style="display:none;">
+      Punktgröße: <input type="range" min="10" max="30" value="1" class="slider" id="punkt-slider">
+    </div>
+  </div>
   <div id="legende">
     <h3>Legende</h3>
     <ul>
