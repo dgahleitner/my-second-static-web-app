@@ -19,7 +19,7 @@ function updatePunktSize() {
 }
 
 document.getElementById('punkt-slider').value = punktDiameterRatio * 1000;
-document.getElementById('punkt-slider').addEventListener('input', function() {
+document.getElementById('punkt-slider').addEventListener('input', function () {
   punktDiameterRatio = this.value / 1000;
   localStorage.setItem('punktDiameterRatio', punktDiameterRatio.toString());
   updatePunktSize();
@@ -32,14 +32,10 @@ function toggleEditMode() {
   document.getElementById('delete-btn').style.display = editing ? 'block' : 'none';
   document.getElementById('slider-div').style.display = editing ? 'block' : 'none';
 
+  circles.forEach(circle => editing ? circle.show() : circle.hide());
+
   if (!editing) {
-    const punkte = document.getElementsByClassName('punkt');
-    for (let punkt of punkte) {
-      let relativeLeft = punkt.offsetLeft / document.getElementById('map').offsetWidth;
-      let relativeTop = punkt.offsetTop / document.getElementById('map').offsetHeight;
-      localStorage.setItem(punkt.id, JSON.stringify({ left: relativeLeft, top: relativeTop }));
-    }
-    localStorage.setItem('punktCount', punktCount.toString());
+    savePunktPositions();
   }
 }
 
@@ -51,7 +47,7 @@ function createPunkt() {
   punkt.style.left = '50%';
   punkt.style.top = '50%';
   punktCount++;
-  initPunkt(punkt);
+  initElement(punkt, true);
 }
 
 function deletePunkt() {
@@ -63,55 +59,55 @@ function deletePunkt() {
   }
 }
 
-function initPunkt(punkt) {
+function initElement(element, isPunkt) {
   let offset = { x: 0, y: 0 };
   let isDown = false;
 
-  const savedPosition = JSON.parse(localStorage.getItem(punkt.id));
+  const savedPosition = JSON.parse(localStorage.getItem(element.id));
   if (savedPosition) {
-    punkt.style.left = savedPosition.left * 100 + '%';
-    punkt.style.top = savedPosition.top * 100 + '%';
+    element.style.left = savedPosition.left * 100 + '%';
+    element.style.top = savedPosition.top * 100 + '%';
   }
 
   let dB = Math.floor(Math.random() * 101);
   let hue = 120 - (dB * 1.2);
-  punkt.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+  element.style.backgroundColor = `hsla(${hue}, 100%, 50%, 0.5)`;
 
   setInterval(() => {
     let change = Math.floor(Math.random() * 21) - 10;
     dB = Math.max(0, Math.min(100, dB + change));
     hue = 120 - (dB * 1.2);
-    punkt.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+    element.style.backgroundColor = `hsla(${hue}, 100%, 50%, 0.5)`;
 
-    if (activePunkt === punkt) {
+    if (activePunkt === element) {
       tooltip.innerText = `${dB} dB`;
     }
   }, 1000);
 
-  punkt.addEventListener('mouseover', (event) => {
+  element.addEventListener('mouseover', (event) => {
     if (editing) return;
 
-    activePunkt = punkt;
+    activePunkt = element;
     tooltip.innerText = `${dB} dB`;
     tooltip.style.display = 'block';
     tooltip.style.left = (event.pageX + 10) + 'px';
     tooltip.style.top = (event.pageY + 10) + 'px';
   }, true);
 
-  punkt.addEventListener('mouseout', () => {
-    if (activePunkt === punkt) {
+  element.addEventListener('mouseout', () => {
+    if (activePunkt === element) {
       activePunkt = null;
     }
     tooltip.style.display = 'none';
   }, true);
 
-  punkt.addEventListener('mousedown', (event) => {
+  element.addEventListener('mousedown', (event) => {
     if (!editing) return;
 
     isDown = true;
     offset = {
-      x: punkt.offsetLeft - event.clientX,
-      y: punkt.offsetTop - event.clientY
+      x: element.offsetLeft - event.clientX,
+      y: element.offsetTop - event.clientY
     };
   }, true);
 
@@ -125,24 +121,150 @@ function initPunkt(punkt) {
 
     event.preventDefault();
     if (isDown) {
-      punkt.style.left = ((event.clientX + offset.x) / document.getElementById('map').offsetWidth) * 100 + '%';
-      punkt.style.top = ((event.clientY + offset.y) / document.getElementById('map').offsetHeight) * 100 + '%';
+      element.style.left = ((event.clientX + offset.x) / document.getElementById('map').offsetWidth) * 100 + '%';
+      element.style.top = ((event.clientY + offset.y) / document.getElementById('map').offsetHeight) * 100 + '%';
+
+      if (isPunkt) {
+        let relativeLeft = element.offsetLeft / document.getElementById('map').offsetWidth;
+        let relativeTop = element.offsetTop / document.getElementById('map').offsetHeight;
+        localStorage.setItem(element.id, JSON.stringify({ left: relativeLeft, top: relativeTop }));
+      } else {
+        let x = (event.clientX - imageRect.left) / imageRect.width;
+        let y = (event.clientY - imageRect.top) / imageRect.height;
+        let index = circles.indexOf(element);
+        pointsArray[index] = [x, y];
+        polygon.plot(pointsArray.map(point => [point[0] * containerRect.width, point[1] * containerRect.height]));
+
+        localStorage.setItem('pointsArray', JSON.stringify(pointsArray));
+      }
     }
   }, true);
 }
 
-window.addEventListener('resize', updatePunktSize);
+window.addEventListener('resize', function() {
+  updatePunktSize();
+  updatePolygonSize();
+});
 
 document.getElementById('edit-btn').addEventListener('click', toggleEditMode);
 document.getElementById('add-btn').addEventListener('click', createPunkt);
 document.getElementById('delete-btn').addEventListener('click', deletePunkt);
 
-for (let i = 0; i < punktCount; i++) {
-  const punkt = document.createElement('div');
-  punkt.classList.add('punkt');
-  punkt.id = 'punkt' + (i + 1);
-  document.getElementById('map').appendChild(punkt);
-  initPunkt(punkt);
+let circles = [];
+let imageRect = document.querySelector("#map img").getBoundingClientRect();
+let polygon;
+let pointsArray;
+
+function createInteractivePolygon() {
+  let draw = SVG().addTo('#svg-container').size('100%', '100%');
+  let containerRect = document.getElementById('svg-container').getBoundingClientRect();
+  let polygonHovered = false;
+
+  pointsArray = JSON.parse(localStorage.getItem('pointsArray')) ||
+    [[100 / containerRect.width, 100 / containerRect.height],
+    [150 / containerRect.width, 150 / containerRect.height],
+    [100 / containerRect.width, 200 / containerRect.height],
+    [50 / containerRect.width, 150 / containerRect.height]];
+
+  let dB = Math.floor(Math.random() * 101);
+  let hue = 120 - (dB * 1.2);
+
+  polygon = draw.polygon(pointsArray.map(point => [point[0] * containerRect.width, point[1] * containerRect.height])).fill(`hsla(${hue}, 100%, 50%, 0.5)`).stroke({ width: 1, color: '#000' }).opacity(0.5);
+
+  pointsArray.forEach(function (point, i) {
+    let circle = draw.circle(10).center(point[0] * imageRect.width, point[1] * imageRect.height).fill('#c00');
+    circle.hide();
+    circles.push(circle);
+
+    circle.node.addEventListener('mousedown', startDrag);
+    circle.node.addEventListener('mousemove', drag);
+    circle.node.addEventListener('mouseup', endDrag);
+    circle.node.addEventListener('mouseleave', endDrag);
+
+    function startDrag(event) {
+      if (editing) {
+        circle.node.dragging = true;
+        circle.node.dragOffset = {
+          x: event.clientX / imageRect.width - circle.cx() / imageRect.width,
+          y: event.clientY / imageRect.height - circle.cy() / imageRect.height
+        };
+      }
+    }
+
+    function drag(event) {
+      if (editing && circle.node.dragging) {
+        let x = (event.clientX - imageRect.left) / imageRect.width;
+        let y = (event.clientY - imageRect.top) / imageRect.height;
+        circle.center(x * containerRect.width, y * containerRect.height);
+        pointsArray[i] = [x, y];
+        polygon.plot(pointsArray.map(point => [point[0] * containerRect.width, point[1] * containerRect.height]));
+
+        localStorage.setItem('pointsArray', JSON.stringify(pointsArray));
+      }
+    }
+
+    function endDrag() {
+      if (editing) {
+        circle.node.dragging = false;
+      }
+    }
+
+    polygon.node.addEventListener('mouseover', (event) => {
+      if (editing) return;
+
+      polygonHovered = true;
+      tooltip.style.display = 'block';
+      tooltip.style.left = (event.pageX + 10) + 'px';
+      tooltip.style.top = (event.pageY + 10) + 'px';
+    }, true);
+
+    polygon.node.addEventListener('mouseout', () => {
+      polygonHovered = false;
+      tooltip.style.display = 'none';
+    }, true);
+
+    setInterval(() => {
+      let change = Math.floor(Math.random() * 21) - 10;
+      dB = Math.max(0, Math.min(100, dB + change));
+      hue = 120 - (dB * 1.2);
+      polygon.fill(`hsla(${hue}, 100%, 50%, 0.5)`);
+
+      if (polygonHovered) {
+        tooltip.innerText = `${dB} dB`;
+      }
+    }, 1000);
+  });
 }
 
-updatePunktSize();
+function updatePolygonSize() {
+  imageRect = document.querySelector("#map img").getBoundingClientRect();
+
+  circles.forEach((circle, i) => {
+    circle.center(pointsArray[i][0] * imageRect.width, pointsArray[i][1] * imageRect.height);
+  });
+  polygon.plot(pointsArray.map(point => [point[0] * imageRect.width, point[1] * imageRect.height]));
+}
+
+function savePunktPositions() {
+  const punkte = document.getElementsByClassName('punkt');
+  for (let punkt of punkte) {
+    let relativeLeft = punkt.offsetLeft / document.getElementById('map').offsetWidth;
+    let relativeTop = punkt.offsetTop / document.getElementById('map').offsetHeight;
+    localStorage.setItem(punkt.id, JSON.stringify({ left: relativeLeft, top: relativeTop }));
+  }
+  localStorage.setItem('punktCount', punktCount.toString());
+}
+
+window.addEventListener('DOMContentLoaded', (event) => {
+  createInteractivePolygon();
+
+  for (let i = 0; i < punktCount; i++) {
+    const punkt = document.createElement('div');
+    punkt.classList.add('punkt');
+    punkt.id = 'punkt' + (i + 1);
+    document.getElementById('map').appendChild(punkt);
+    initElement(punkt, true);
+  }
+
+  updatePunktSize();
+});
