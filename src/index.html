@@ -1,34 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
-
 <body>
-  <h1>Static Web Apps Database Connections</h1>
-  <blockquote>
-    Open the console in the browser developer tools to see the API responses.
-  </blockquote>
-  <div>
-    <button id="list" onclick="list()">List</button>
-    <button id="get" onclick="get()">Get</button>
-    <button id="update" onclick="update()">Update</button>
-    <button id="create" onclick="create()">Create</button>
-    <button id="delete" onclick="del()">Delete</button>
+  <div id="map">
+    <img src="bild.png" alt="Gebäudeplan">
+    <div class="punkt" id="punkt1"></div>
+    <div class="punkt" id="punkt2"></div>
+    <div class="punkt" id="punkt3"></div>
+    <div class="punkt" id="punkt4"></div>
+    <div class="punkt" id="punkt5"></div>
+    <div class="punkt" id="punkt6"></div>
+    <div class="punkt" id="punkt7"></div>
+    <div class="punkt" id="punkt8"></div>
+    <div class="punkt" id="punkt9"></div>
+    <div class="punkt" id="punkt10"></div>
+    <div class="punkt" id="punkt11"></div>
+    <div class="punkt" id="punkt12"></div>
   </div>
-  <script>
-    async function list() {
-      const endpoint = '/data-api/rest/Person';
-      const response = await fetch(endpoint);
-      const data = await response.json();
-      console.table(data.value);
-    }
-  </script>
-
+  <button id="edit-btn">Bearbeiten</button>
+  <div id="legende">
+    <h3>Legende</h3>
+    <ul>
+      <li><span class="farbe" style="background-color:hsl(120, 100%, 50%)"></span> 0-20 dB</li>
+      <li><span class="farbe" style="background-color:hsl(90, 100%, 50%)"></span> 21-40 dB</li>
+      <li><span class="farbe" style="background-color:hsl(60, 100%, 50%)"></span> 41-60 dB</li>
+      <li><span class="farbe" style="background-color:hsl(30, 100%, 50%)"></span> 61-80 dB</li>
+      <li><span class="farbe" style="background-color:hsl(0, 100%, 50%)"></span> 81-100 dB</li>
+    </ul>
+  </div>
+  <script src="script.js"></script>
 </body>
-
 </html>
