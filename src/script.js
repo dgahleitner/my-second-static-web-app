@@ -30,6 +30,8 @@ function toggleEditMode() {
   document.getElementById('edit-btn').innerText = editing ? 'Fertig' : 'Bearbeiten';
   document.getElementById('add-btn').style.display = editing ? 'block' : 'none';
   document.getElementById('delete-btn').style.display = editing ? 'block' : 'none';
+  document.getElementById('add-polygon-btn').style.display = editing ? 'block' : 'none';
+  document.getElementById('delete-polygon-btn').style.display = editing ? 'block' : 'none';
   document.getElementById('slider-div').style.display = editing ? 'block' : 'none';
 
   circles.forEach(circle => editing ? circle.show() : circle.hide());
@@ -150,17 +152,57 @@ document.getElementById('edit-btn').addEventListener('click', toggleEditMode);
 document.getElementById('add-btn').addEventListener('click', createPunkt);
 document.getElementById('delete-btn').addEventListener('click', deletePunkt);
 
+
+let polygonCount = Number(localStorage.getItem('polygonCount') || '0');
+let polygons = [];
+
+function createPolygon() {
+  let polygonId = 'polygon' + (polygonCount + 1);
+  createInteractivePolygon(polygonId);
+  polygonCount++;
+  localStorage.setItem('polygonCount', polygonCount.toString());
+  toggleEditMode();
+  toggleEditMode();
+}
+
+function deletePolygon() {
+  if (polygonCount > 0) {
+    let polygonId = 'polygon' + polygonCount;
+    let index = polygons.findIndex(p => p.polygonId === polygonId);
+    if (index !== -1) {
+      polygons[index].polygon.remove();
+      
+      let pointsArray = polygons[index].pointsArray;
+      for (let i = 0; i < pointsArray.length; i++) {
+        circles[index * pointsArray.length + i].remove();
+      }
+
+      circles.splice(index * pointsArray.length, pointsArray.length);
+
+      polygons.splice(index, 1);
+      localStorage.removeItem(polygonId);
+      localStorage.removeItem('pointsArray' + polygonId);
+
+      polygonCount--;
+      localStorage.setItem('polygonCount', polygonCount.toString());
+    }
+  }
+}
+
+
 let circles = [];
 let imageRect = document.querySelector("#map img").getBoundingClientRect();
 let polygon;
 let pointsArray;
+let svgContainer = SVG().addTo('#svg-container').size('100%', '100%');
 
-function createInteractivePolygon() {
-  let draw = SVG().addTo('#svg-container').size('100%', '100%');
+
+function createInteractivePolygon(polygonId) {
+  let draw = svgContainer;
   let containerRect = document.getElementById('svg-container').getBoundingClientRect();
   let polygonHovered = false;
 
-  pointsArray = JSON.parse(localStorage.getItem('pointsArray')) ||
+  pointsArray = JSON.parse(localStorage.getItem('pointsArray' + polygonId)) ||
     [[100 / containerRect.width, 100 / containerRect.height],
     [150 / containerRect.width, 150 / containerRect.height],
     [100 / containerRect.width, 200 / containerRect.height],
@@ -170,6 +212,8 @@ function createInteractivePolygon() {
   let hue = 120 - (dB * 1.2);
 
   polygon = draw.polygon(pointsArray.map(point => [point[0] * containerRect.width, point[1] * containerRect.height])).fill(`hsla(${hue}, 100%, 50%, 0.5)`).stroke({ width: 1, color: '#000' }).opacity(0.5);
+
+  polygons.push({ polygonId: polygonId, polygon: polygon, pointsArray: pointsArray });
 
   pointsArray.forEach(function (point, i) {
     let circle = draw.circle(10).center(point[0] * imageRect.width, point[1] * imageRect.height).fill('#c00');
@@ -199,7 +243,7 @@ function createInteractivePolygon() {
         pointsArray[i] = [x, y];
         polygon.plot(pointsArray.map(point => [point[0] * containerRect.width, point[1] * containerRect.height]));
 
-        localStorage.setItem('pointsArray', JSON.stringify(pointsArray));
+        localStorage.setItem('pointsArray' + polygonId, JSON.stringify(pointsArray));
       }
     }
 
@@ -255,8 +299,14 @@ function savePunktPositions() {
   localStorage.setItem('punktCount', punktCount.toString());
 }
 
+document.getElementById('add-polygon-btn').addEventListener('click', createPolygon);
+document.getElementById('delete-polygon-btn').addEventListener('click', deletePolygon);
+
 window.addEventListener('DOMContentLoaded', (event) => {
-  createInteractivePolygon();
+  for (let i = 0; i < polygonCount; i++) {
+    const polygonId = 'polygon' + (i + 1);
+    createInteractivePolygon(polygonId);
+  }
 
   for (let i = 0; i < punktCount; i++) {
     const punkt = document.createElement('div');
