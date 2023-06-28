@@ -4,31 +4,35 @@
   <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-  <div id="map">
-    <img src="bild.png" alt="Gebäudeplan">
-    <div id="svg-container"></div>
-  </div>
+  <div class="container">
+    <div id="map">
+      <img src="bild.png" alt="Gebäudeplan">
+      <div id="svg-container"></div>
+    </div>
   
-  <div id="buttons">
-    <button id="edit-btn">Bearbeiten</button>
-    <button id="add-btn" style="display: none;">Punkt hinzufuegen</button>
-    <button id="delete-btn" style="display: none;">Punkt loeschen</button>
-    <button id="add-polygon-btn" style="display: none;">Polygon hinzufuegen</button>
-    <button id="delete-polygon-btn" style="display: none;">Polygon loeschen</button>
-    <div id="slider-div" style="display:none;">
-      Punktgroesse: <input type="range" min="10" max="30" value="1" class="slider" id="punkt-slider">
+    <div id="buttons">
+      <button id="edit-btn">Bearbeiten</button>
+      <button id="add-btn" class="action-btn">Punkt hinzufuegen</button>
+      <button id="delete-btn" class="action-btn">Punkt loeschen</button>
+      <button id="add-polygon-btn" class="action-btn">Polygon hinzufuegen</button>
+      <button id="delete-polygon-btn" class="action-btn">Polygon loeschen</button>
+      <div id="slider-div" style="display:none;">
+        Punktgroeße: <input type="range" min="10" max="30" value="1" class="slider" id="punkt-slider">
+      </div>
+    </div>
+    
+    <div id="legende">
+      <h3>Legende</h3>
+      <ul>
+        <li><span class="farbe" style="background-color:hsl(120, 100%, 50%)"></span> 0-20 dB</li>
+        <li><span class="farbe" style="background-color:hsl(90, 100%, 50%)"></span> 21-40 dB</li>
+        <li><span class="farbe" style="background-color:hsl(60, 100%, 50%)"></span> 41-60 dB</li>
+        <li><span class="farbe" style="background-color:hsl(30, 100%, 50%)"></span> 61-80 dB</li>
+        <li><span class="farbe" style="background-color:hsl(0, 100%, 50%)"></span> 81-100 dB</li>
+      </ul>
     </div>
   </div>
-  <div id="legende">
-    <h3>Legende</h3>
-    <ul>
-      <li><span class="farbe" style="background-color:hsl(120, 100%, 50%)"></span> 0-20 dB</li>
-      <li><span class="farbe" style="background-color:hsl(90, 100%, 50%)"></span> 21-40 dB</li>
-      <li><span class="farbe" style="background-color:hsl(60, 100%, 50%)"></span> 41-60 dB</li>
-      <li><span class="farbe" style="background-color:hsl(30, 100%, 50%)"></span> 61-80 dB</li>
-      <li><span class="farbe" style="background-color:hsl(0, 100%, 50%)"></span> 81-100 dB</li>
-    </ul>
-  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.1.1/svg.min.js"></script>
   <script src="script.js"></script>
 </body>

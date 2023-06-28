@@ -1,3 +1,13 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 #map {
   position: relative;
 }
@@ -39,6 +49,7 @@
   background-color: white;
   border: 1px solid black;
   padding: 10px;
+  border-radius: 5px;
 }
 
 .tooltip {
@@ -48,9 +59,41 @@
   border: 1px solid black;
   padding: 5px;
   z-index: 100;
+  border-radius: 5px;
 }
 
 #buttons {
   display: flex;
   gap: 10px;
+  margin-top: 20px;
 }
+
+.action-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  background-color: #0056b3;
+}
+
+.slider {
+  width: 100px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
