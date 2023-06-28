@@ -303,6 +303,8 @@ document.getElementById('add-polygon-btn').addEventListener('click', createPolyg
 document.getElementById('delete-polygon-btn').addEventListener('click', deletePolygon);
 
 window.addEventListener('DOMContentLoaded', (event) => {
+  toggleEditMode();
+  toggleEditMode();
   for (let i = 0; i < polygonCount; i++) {
     const polygonId = 'polygon' + (i + 1);
     createInteractivePolygon(polygonId);
